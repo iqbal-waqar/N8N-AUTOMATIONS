@@ -1,0 +1,264 @@
+{
+  "name": "RAG AGENT",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "id": "879e6447-679b-4e18-a090-a7e818bb3971",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        -1312
+      ],
+      "webhookId": "3cb94aea-0ddb-4f06-81a8-950e8325ad17"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "id": "34eeacb2-973b-43fb-ad02-e3d3fc7abdc5",
+      "name": "Vector Store - Insert Documents",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -944,
+        -1472
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "ded9fbae-5d71-466f-a40b-6d66502a7f95",
+      "name": "Document Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        -1424
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1eb71b97-6e7b-4169-adbf-76f396caad8c",
+      "name": "Recursive Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -1248
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "3dbbcf36-b872-408d-ab06-b2f0a6eac768",
+      "name": "Google Gemini Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -1248
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Kzm6z9Rhff6bT5Ev",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant that answers questions based on the provided document context. You can respond to greetings and casual conversation naturally. However, when answering factual questions, you must ONLY use information from the uploaded document. If a question cannot be answered using the document, respond with: I cannot answer this question as it is not covered in the uploaded document. Do not use external knowledge for factual questions."
+        }
+      },
+      "id": "69ce5ed3-0101-41ee-9999-4fe19f8fde66",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1040,
+        -1280
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ac429e9e-0895-4d67-a546-0a01a253a477",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        -1152
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Kzm6z9Rhff6bT5Ev",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "9459109f-95e2-41b1-8ea3-2debce218638",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1040,
+        -1088
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search through the uploaded document to find relevant information to answer user questions. Use this tool whenever the user asks a question about the document content.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "id": "3175a80e-95a6-47bc-b16e-22d24a62bd7b",
+      "name": "Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -832,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Retrieval-Augmented-Generation\n",
+        "height": 80,
+        "width": 400,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1472,
+        -1472
+      ],
+      "typeVersion": 1,
+      "id": "f2a88c5a-66f8-42b4-ad7a-beef6923e78a",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Vector Store - Insert Documents",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Document Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Vector Store - Insert Documents",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Vector Store - Insert Documents",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Vector Store Tool",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f8fcd2b1-ba7e-47b1-a2e0-f9f5d3027bd9",
+  "meta": {
+    "instanceId": "8eaaf9659b93f0c36de1e6ef4e0781f360a9ab1d6b2aa28330b7024e5df2c405"
+  },
+  "id": "wvuMhxdFomdaOTIj",
+  "tags": []
+}
